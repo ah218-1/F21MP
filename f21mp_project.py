@@ -8,14 +8,14 @@ Original file is located at
 """
 
 import pandas as pd
-!pip install transformers
+
 import json
 from transformers import AutoTokenizer
 
 import json
 
 # Load the JSONL dataset
-data_file = "/content/super_scotus_sample_clean.jsonl"
+data_file = "super_scotus_sample_clean.jsonl"
 cases = {}
 
 with open(data_file, "r") as f:
@@ -77,7 +77,7 @@ print("Justia sections:", list(example_case["justia_sections"].keys()))
 print("First 2 transcript utterances:", example_case["convos"][:2])
 
 # Install necessary packages (if not already installed)
-!pip install langchain tiktoken
+
 
 import re
 from langchain.text_splitter import RecursiveCharacterTextSplitter
@@ -140,7 +140,7 @@ print(f"Total Justia chunks: {len(justia_chunks)} (from {len(cases)} cases)")
 print("Sample chunk metadata:", justia_chunks[0].metadata)
 print("Sample chunk text snippet:", justia_chunks[0], "...")
 
-!pip install langchain sentence-transformers scikit-learn --quiet
+
 
 import re
 import numpy as np
@@ -223,7 +223,7 @@ if convos_chunks:
 else:
     print("⚠️ No transcript chunks were generated.")
 
-!pip install faiss-cpu
+
 
 from langchain.schema import Document
 from sentence_transformers import SentenceTransformer
@@ -259,5 +259,5 @@ index.add(embeddings_np)
 indexed_docs = all_chunks
 
 # Save FAISS index to disk
-faiss.write_index(index, "justia_convos.index")
-print("✅ FAISS index saved as justia_convos.index")
+faiss.write_index(index, "data/justia_convos.index")
+print("✅ FAISS index saved as justia_convos.index in data folder")
