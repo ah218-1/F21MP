@@ -94,7 +94,7 @@ def final_grounded_summary(intermediate_summary, support_docs, case_id):
 results = []
 case_ids = sorted({doc.metadata["case_id"] for doc in convos_chunks})
 case_ids = [cid for cid in case_ids if cid in gold_labels]
-case_ids = case_ids[:20]  # Limit for test run
+case_ids = case_ids[:5]  # Limit for test run
 
 print(f"[INFO] Running on {len(case_ids)} cases with gold labels")
 
