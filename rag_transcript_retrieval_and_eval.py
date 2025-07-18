@@ -13,7 +13,7 @@ import pickle
 import faiss
 import torch
 
-# ✅ Load persisted variables
+# Load persisted variables
 with open("data/gold_labels.pkl", "rb") as f:
     gold_labels = pickle.load(f)
 
@@ -26,22 +26,22 @@ with open("data/convos_chunks.pkl", "rb") as f:
 with open("data/indexed_docs.pkl", "rb") as f:
     indexed_docs = pickle.load(f)
 
-# ✅ Load embeddings
+# Load embeddings
 embeddings_np = np.load("data/embeddings.npy")
 
-# ✅ Load FAISS index
+# Load FAISS index
 index = faiss.read_index("data/justia_convos.index")
 
-# ✅ Load LexT5
+# Load LexT5
 tokenizer = AutoTokenizer.from_pretrained("santoshtyss/lt5-large", use_auth_token=True)
 model = AutoModelForSeq2SeqLM.from_pretrained("santoshtyss/lt5-large", use_auth_token=True)
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 model = model.to(device)
 
-# ✅ Initialize ROUGE scorer
+# Initialize ROUGE scorer
 scorer = rouge_scorer.RougeScorer(['rouge1', 'rouge2', 'rougeL'], use_stemmer=True)
 
-# ✅ Retrieval function
+# Retrieval function
 TOP_K = 3
 
 def retrieve_justia_chunks(query_vector, case_id, top_k=TOP_K):
@@ -54,7 +54,7 @@ def retrieve_justia_chunks(query_vector, case_id, top_k=TOP_K):
     justia_indices = justia_indices[:top_k]
     return [indexed_docs[idx] for idx in justia_indices]
 
-# ✅ Summarize a single transcript chunk
+# Summarize a single transcript chunk
 
 def summarize_chunk(chunk_text):
     prompt = f"""
@@ -68,7 +68,7 @@ We are creating one comprehensive summary for the legal document by recursively 
     outputs = model.generate(**inputs, max_length=128, num_beams=4, early_stopping=True)
     return tokenizer.decode(outputs[0], skip_special_tokens=True)
 
-# ✅ Summarize all transcript chunks for a case
+# Summarize all transcript chunks for a case
 
 def summarize_chunks_group(convo_chunks_for_case):
     chunk_summaries = []
@@ -77,7 +77,7 @@ def summarize_chunks_group(convo_chunks_for_case):
         chunk_summaries.append(chunk_summary)
     return " ".join(chunk_summaries)
 
-# ✅ Generate final grounded summary using Justia
+# Generate final grounded summary using Justia
 
 def final_grounded_summary(intermediate_summary, support_docs, case_id):
     retrieved_opinion_chunks_text = "\n".join(
@@ -99,7 +99,7 @@ We are merging the preceding context and the summaries into one comprehensive su
     outputs = model.generate(**inputs, max_length=512, num_beams=4, early_stopping=True)
     return tokenizer.decode(outputs[0], skip_special_tokens=True)
 
-# ✅ Main pipeline
+# Main pipeline
 results = []
 case_ids = sorted({doc.metadata["case_id"] for doc in convos_chunks})
 case_ids = [cid for cid in case_ids if cid in gold_labels]
@@ -136,6 +136,6 @@ for case_id in case_ids:
         "rouge_score": rouge_score
     })
 
-# ✅ Save results
+# Save results
 pd.DataFrame(results).to_csv("data/summaries_and_scores_TEST.csv", index=False)
-print("\n✅ Recursive summarization results saved to data/summaries_and_scores_TEST.csv")
+print("\n Recursive summarization results saved to data/summaries_and_scores_TEST.csv")
