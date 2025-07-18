@@ -13,7 +13,7 @@ import pickle
 import faiss
 import torch
 
-# ✅ Load persisted variables
+# Load persisted variables
 with open("data/gold_labels.pkl", "rb") as f:
     gold_labels = pickle.load(f)
 
@@ -26,13 +26,13 @@ with open("data/convos_chunks.pkl", "rb") as f:
 with open("data/indexed_docs.pkl", "rb") as f:
     indexed_docs = pickle.load(f)
 
-# ✅ Load embeddings
+# Load embeddings
 embeddings_np = np.load("data/embeddings.npy")
 
-# ✅ Load FAISS index
+# Load FAISS index
 index = faiss.read_index("data/justia_convos.index")
 
-# ✅ Load LexT5
+# Load LexT5
 tokenizer = AutoTokenizer.from_pretrained(
     "santoshtyss/lt5-large", use_auth_token=True
 )
@@ -42,10 +42,10 @@ model = AutoModelForSeq2SeqLM.from_pretrained(
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 model = model.to(device)
 
-# ✅ Initialize ROUGE scorer
+# Initialize ROUGE scorer
 scorer = rouge_scorer.RougeScorer(['rouge1', 'rouge2', 'rougeL'], use_stemmer=True)
 
-# ✅ Retrieval function
+# Retrieval function
 TOP_K = 3
 
 def retrieve_justia_chunks(query_vector, case_id, top_k=TOP_K):
@@ -58,7 +58,7 @@ def retrieve_justia_chunks(query_vector, case_id, top_k=TOP_K):
     justia_indices = justia_indices[:top_k]
     return [indexed_docs[idx] for idx in justia_indices]
 
-# ✅ Main pipeline
+# Main pipeline
 results = []
 case_ids = sorted({doc.metadata["case_id"] for doc in convos_chunks})
 case_ids = [cid for cid in case_ids if cid in gold_labels]
@@ -136,7 +136,7 @@ for case_id in case_ids:
     print(f"[DEBUG] Prompt length in tokens AFTER TRIM: {prompt_tokens}")
 
 
-    # ✅ Use LexT5 for generation
+    # Use LexT5 for generation
     inputs = tokenizer(
         prompt,
         return_tensors="pt",
@@ -154,7 +154,7 @@ for case_id in case_ids:
     summary = tokenizer.decode(outputs[0], skip_special_tokens=True)
     print(f"\n📌 [SUMMARY] Case {case_id}:\n{summary}\n")
 
-    # ✅ Compute ROUGE if gold label exists
+    # Compute ROUGE if gold label exists
     if case_id in gold_labels:
         ref = gold_labels[case_id]
         rouge_score = scorer.score(ref, summary)
@@ -168,6 +168,6 @@ for case_id in case_ids:
         "rouge_score": rouge_score
     })
 
-# ✅ Save results
+# Save results
 pd.DataFrame(results).to_csv("data/summaries_and_scores_TEST.csv", index=False)
-print("\n✅ Small test results saved to data/summaries_and_scores_TEST.csv")
+print("\nSmall test results saved to data/summaries_and_scores_TEST.csv")
