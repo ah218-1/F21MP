@@ -1,8 +1,3 @@
-# -*- coding: utf-8 -*-
-"""
-RAG and Eval - Reference-Based Only (No QAFactEval) [Recursive Grounded Summarization]
-"""
-
 # --- 📚 Imports ---
 from sklearn.metrics.pairwise import cosine_similarity
 from transformers import AutoTokenizer, AutoModelForSeq2SeqLM
